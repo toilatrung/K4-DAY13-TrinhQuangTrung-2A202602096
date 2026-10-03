@@ -9,6 +9,7 @@
 | File | Nội dung |
 | --- | --- |
 | `report/K4-DAY13-Nhom01/TEAMMATES.md` | Người làm và vai trò |
+| `analysis/compare_runs.py`, `analysis/compare_runs.txt` | Phân tích phụ từ JSON + PCD (viết với hỗ trợ AI, không chạy lại model) |
 | `report/K4-DAY13-Nhom01/PRE-LABEL-REPORT.md` | Báo cáo PointPillars: provenance, ba lượt A/B/C, phép z, ca QC có kiểm soát, nhận xét cá nhân |
 
 ## Phần PointPillars

@@ -27,6 +27,28 @@
 - **ROI và Side:** chỉ xét cửa sổ phía trước (ảnh Side hiển thị x −20…70 m, các hộp đều ở x>0), nên đối tượng phía sau hoặc ngoài ROI không được dự đoán và không được tính là model bỏ sót. Ảnh Side là chiếu x–z nên chồng các vật khác y, và không cho kiểm yaw hay đối chiếu đầu xe.
 - **Chưa đủ cơ sở để import:** mọi JSON ở đây là PCD KITTI minh họa (`frame_id=demo`), không import vào CVAT/Robotaxi. Với Robotaxi, chỉ dùng prediction do portal nạp đúng frame. Cần kiểm tiếp bằng ảnh camera và nhiều góc 3D trước khi tin bất kỳ hộp nào.
 
+## Phân tích phụ — có hỗ trợ của AI
+
+> **Công cụ AI:** script `analysis/compare_runs.py` và đoạn phân tích này được viết với sự hỗ trợ của trợ lý AI (Claude Code) theo yêu cầu của Trịnh Quang Trung. Script chỉ đọc `boxes-*.json` và `input/demo.pcd`, không chạy lại model; kết quả đầy đủ trong `analysis/compare_runs.txt`. Đây là phân tích bổ sung, không phải output của runner. Số liệu bên dưới lấy từ file đó; có thể chạy lại bằng `python3 analysis/compare_runs.py <ket-qua-nhom-01> <demo.pcd>`.
+
+**1. Vì sao A chỉ có 1 hộp?** Cửa sổ của checkpoint KITTI là z_model ∈ [−3, 1] m, với `z_model = z_source − z_ground − delta`. Trong vùng x–y của checkpoint có 17106 điểm. Ở A (delta=0) có **6886 điểm (40.3%) có z_model>1 m và bị cắt** trước khi vào mạng. Ở B/C (delta=1.73) chỉ còn 177 điểm (1.0%) bị cắt. Đây là một cách giải thích có kiểm chứng được cho việc A gần như không thấy xe (thân và mái xe ở z nguồn 1–2.5 m nằm ngoài cửa sổ). Nó giải thích chiều hướng chứ không chứng minh B đúng.
+
+**2. Hộp A#0 và B#1.** Tâm A#0 (13.15, −0.45) nằm trong footprint B#1 (14.77, −1.08), nhưng yaw A#0 = 153.0° còn B#1 = −17.3°, tức lệch khoảng 170°. A#0 có đáy z=−0.40 (chìm dưới mặt đường trên ảnh Side). Vì vậy A#0 không phải B#1 dịch đi một lượng cố định.
+
+**3. C so với B.** 4/6 hộp `pedestrian` của C có tâm nằm trong footprint của một hộp B: C#0→B#5 (xe, score 0.73), C#2→B#0 (xe, 0.93), C#4→B#1 (xe, 0.93), C#5→B#10 (two-wheels, 0.38). C#1 và C#3 không trùng hộp B nào. Cạnh pillar 0.32 làm lưới BEV giảm từ 432×496 xuống 216×248 ô, trong khi số điểm trong cửa sổ z bằng B (16928). Vậy sự thay đổi là do biểu diễn đầu vào, không phải do dịch z. Mẫu "người" xuất hiện đúng nơi B thấy xe gợi ý C sai class trên frame này, nhưng không có nhãn để khẳng định.
+
+**4. Hộp B cần kiểm từng cái.** Cột "đáy − mặt đất" lấy từ 5% điểm thấp nhất trong footprint hộp và chỉ là gợi ý, vì vùng bị che có thể không có điểm mặt đất.
+
+| Hộp B | Dấu hiệu từ `compare_runs.txt` | Hành động |
+| --- | --- | --- |
+| #4 vehicles (3.70, 2.68), score 0.81 | Đáy 0.15 m nhưng điểm thấp nhất trong footprint ở 0.59 m (đáy thấp hơn 0.44 m) | Kiểm bằng góc Bên và camera |
+| #11 pedestrian (18.67, 0.23), score 0.34 | Chỉ 48 điểm, điểm thấp nhất 0.88 m còn đáy −0.02 m (cách 0.90 m); L=0.54 < W=0.90 | Rất không chắc; không tin hộp này |
+| #10 two-wheels (10.32, 5.25), score 0.38 | Đáy lệch 0.32 m so với điểm thấp nhất | Kiểm riêng |
+| #3, #6, #7, #9 (x≥25 m hoặc thưa) | Chỉ 13–40 điểm trong hộp mỗi hộp (#7 có 20 điểm ở x=24.9) | Vùng thưa điểm; ghi chưa chắc, không co hộp |
+| #0, #1, #2, #8 | 506–1679 điểm trong hộp (#2 có 884), đáy sát mặt đất (|đáy − mặt đất| ≤ 0.04 m) | Ít nghi vấn về z nhưng chưa xác minh yaw |
+
+**5. Kết luận cho việc dùng làm pre-label.** A không dùng được vì phần lớn điểm bị cắt. C không dùng được vì lỗi class có hệ thống. B là mốc hợp lý hơn nhưng cần kiểm từng hộp theo bảng trên và kiểm yaw bằng ảnh camera (KITTI có thể nhập nhằng 180°). Không có JSON nào ở đây được import vào CVAT.
+
 ## Phép đổi z và ca QC có kiểm soát — không import CVAT
 
 Phép đổi z thuận/ngược của bài:
