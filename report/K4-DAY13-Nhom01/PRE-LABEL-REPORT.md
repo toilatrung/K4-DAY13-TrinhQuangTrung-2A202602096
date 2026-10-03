@@ -4,8 +4,8 @@
 
 ## Nhóm và provenance
 
-- Mã nhóm/phòng: Nhom01. Thành viên: xem `TEAMMATES.md`.
-- Trạng thái: `executed-by-group` (chạy trên máy cá nhân, không phải máy LC). Phần nhận xét của thành viên khác do chính họ viết/xác nhận.
+- Mã nhóm/phòng: chưa có nhóm đầy đủ (xem `TEAMMATES.md`); thư mục `Nhom01` theo tên output. Thành viên: Trịnh Quang Trung.
+- Trạng thái: `executed-by-group` (chạy trên máy cá nhân, không phải máy LC). Báo cáo chỉ có nhận xét của một người; một người đảm nhận mọi vai (khác hướng dẫn nhóm 3–4 người).
 - Người chạy: Trịnh Quang Trung (2A202602096); ngày 2026-10-02; Linux (WSL2) x86_64/amd64, 16 CPU, 7 GB RAM, Docker 29.8.0, không dùng GPU.
 - Gói chạy: `student-prelabel-amd64.zip` (sha256 khớp `SHA256SUMS.txt`: `f58ca337…37aa9`). Lệnh: `python3 student-bundle.py run --bundle . --out ../ket-qua-nhom-01`. `smoke.json` có status `passed` (docker-load, run-A, run-B, run-C, qc-cases đều passed).
 - Image: `day13-pointpillars:lc-20261001-amd64`, ID `sha256:e03983bd922e…2c2`; repo revision `0831856d921609312d42c7582c366e5a311bb7b1`. `smoke.json` ghi `working_tree_dirty: true`, nên không khẳng định bản chạy trùng hoàn toàn với revision này.
@@ -57,10 +57,6 @@ Các ca này do helper tạo có chủ đích từ prediction B (`qc-cases/manif
 - **Phép z:** input được dịch theo delta sau khi trừ `z_ground`; hộp trả về nguồn bằng `z_model + z_ground + delta`, với B là +1.805 m. Vì vậy A và B không thể so bằng cách trừ z từng hộp.
 - **Quyết định ca lỗi:** `case-batch-z` có 13/13 hộp cùng lệch −1.805 m và các trường khác giữ nguyên nên dừng sửa tay và kiểm phép chuyển. `case-one-box-z` chỉ có 1/13 hộp lệch nên kiểm riêng hộp đó, không dừng batch.
 - **Điều chưa chắc:** không có ground truth nên chưa biết cấu hình nào đúng hơn; chưa đối chiếu ảnh camera cho PCD KITTI minh họa; `working_tree_dirty: true` trong `smoke.json` nên chưa chứng minh bản chạy trùng revision. Ảnh Side chưa đủ để kết luận yaw hay class.
-
-### Thành viên 2: (điền — tự viết: vai trò, một quan sát có dẫn file, phép z thuận/ngược, quyết định ca lỗi, điều chưa chắc; nếu chỉ đọc kết quả có sẵn thì ghi `provided-results`)
-
-### Thành viên 3: (điền — như trên)
 
 ## LC ghi nhận riêng
 
